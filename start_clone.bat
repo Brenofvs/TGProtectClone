@@ -1,0 +1,2 @@
+python clone.py
+pause
