@@ -41,7 +41,10 @@ def load_state(file_name):
 def download_progress(current, total):
     print(f"Baixando mídia, andamento do download {(current / total) * 100:.1f}%")
 
-async def clone_channel_messages(app, source_channel_id, destination_channel_id, file_name, last_message_id=None):
+def upload_progress(current, total):
+    print(f"Enviando arquivo, andamento do upload {(current / total) * 100:.1f}%")
+
+async def clone_channel_messages(app, source_channel_id, destination_channel_id, file_name, mention, last_message_id=None):
     messages = []
 
     async for message in app.get_chat_history(source_channel_id):
@@ -73,25 +76,29 @@ async def clone_channel_messages(app, source_channel_id, destination_channel_id,
 
             caption += f"\n\nCanal clonado usando ProtectClone, download do script em @DevWHub"
 
-            if message.photo:
-                await app.send_photo(destination_channel_id, message.photo.file_id, caption=caption)
-                print("Mídia enviada com sucesso.")
-            elif message.video:
-                await app.send_video(destination_channel_id, message.video.file_id, caption=caption)
-                print("Vídeo enviado com sucesso.")
-            elif message.document:
-                await app.send_document(destination_channel_id, message.document.file_id, caption=caption)
-                print("Vídeo enviado com sucesso.")
-            elif message.animation:
-                await app.send_animation(destination_channel_id, message.animation.file_id, caption=caption)
-                print("Vídeo enviado com sucesso.")
-            elif message.sticker:
-                await app.send_sticker(destination_channel_id, message.sticker.file_id)
-                print("Vídeo enviado com sucesso.")
-            elif message.text:
-                await app.send_message(destination_channel_id, message.text + "\n\nCanal clonado usando ProtectClone, download do script em @DevWHub")
-                print("Mensagem encaminhada com sucesso.")
-            last_message_id = message.id
+            if mention == 1:
+                await message.forward(destination_channel_id)
+                last_message_id = message.id
+                print("Mensagem clonada com sucesso.")
+            elif mention == 2:
+                if message.photo:
+                    await app.send_photo(destination_channel_id, message.photo.file_id, caption=caption)
+                elif message.video:
+                    await app.send_video(destination_channel_id, message.video.file_id, caption=caption)
+                elif message.document:
+                    await app.send_document(destination_channel_id, message.document.file_id, caption=caption)                            
+                elif message.audio:
+                    await app.send_audio(destination_channel_id, message.audio.file_id, caption=caption)                            
+                elif message.voice:
+                    await app.send_voice(destination_channel_id, message.voice.file_id, caption=caption)                            
+                elif message.animation:
+                    await app.send_animation(destination_channel_id, message.animation.file_id, caption=caption)                            
+                elif message.sticker:
+                    await app.send_sticker(destination_channel_id, message.sticker.file_id)
+                elif message.text:
+                    await app.send_message(destination_channel_id, message.text + "\n\nCanal clonado usando ProtectClone, download do script em @DevWHub")
+                last_message_id = message.id
+                print("Mensagem clonada com sucesso.")
         except Exception as e:
             print(f"Erro ao encaminhar mensagem: {e}")
             if "CHAT_FORWARDS_RESTRICTED" in str(e):
@@ -100,29 +107,29 @@ async def clone_channel_messages(app, source_channel_id, destination_channel_id,
                     path = ''
                     if message.photo:
                         path = await message.download(progress=download_progress)
-                        await app.send_photo(destination_channel_id, path, caption=caption)
+                        await app.send_photo(destination_channel_id, path, caption=caption, progress=upload_progress)
                     elif message.video:
                         path = await message.download(progress=download_progress)
-                        await app.send_video(destination_channel_id, path, caption=caption)
+                        await app.send_video(destination_channel_id, path, caption=caption, progress=upload_progress)
                     elif message.document:
                         path = await message.download(progress=download_progress)
-                        await app.send_document(destination_channel_id, path, caption=caption)                            
+                        await app.send_document(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                     elif message.audio:
                         path = await message.download(progress=download_progress)
-                        await app.send_audio(destination_channel_id, path, caption=caption)                            
+                        await app.send_audio(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                     elif message.voice:
                         path = await message.download(progress=download_progress)
-                        await app.send_voice(destination_channel_id, path, caption=caption)                            
+                        await app.send_voice(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                     elif message.animation:
                         path = await message.download(progress=download_progress)
-                        await app.send_animation(destination_channel_id, path, caption=caption)                            
+                        await app.send_animation(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                     elif message.sticker:
                         await app.send_sticker(destination_channel_id, message.sticker.file_id)
                     elif message.text:
                         await app.send_message(destination_channel_id, message.text + "\n\nCanal clonado usando ProtectClone, download do script em @DevWHub")
                     os.remove(path)
-                    print("Mídia ou mensagem enviada com sucesso.")
                     last_message_id = message.id
+                    print("Mídia ou mensagem enviada com sucesso.")
                 except Exception as e:
                     print(f"Erro ao processar mídia: {e}")
         save_state(file_name, source_channel_id, destination_channel_id, None, last_message_id)
@@ -164,22 +171,22 @@ async def clone_message(app, message, destination_channel_id, mention):
                 path = ''
                 if message.photo:
                     path = await message.download(progress=download_progress)
-                    await app.send_photo(destination_channel_id, path, caption=caption)
+                    await app.send_photo(destination_channel_id, path, caption=caption, progress=upload_progress)
                 elif message.video:
                     path = await message.download(progress=download_progress)
-                    await app.send_video(destination_channel_id, path, caption=caption)
+                    await app.send_video(destination_channel_id, path, caption=caption, progress=upload_progress)
                 elif message.document:
                     path = await message.download(progress=download_progress)
-                    await app.send_document(destination_channel_id, path, caption=caption)                            
+                    await app.send_document(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                 elif message.audio:
                     path = await message.download(progress=download_progress)
-                    await app.send_audio(destination_channel_id, path, caption=caption)                            
+                    await app.send_audio(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                 elif message.voice:
                     path = await message.download(progress=download_progress)
-                    await app.send_voice(destination_channel_id, path, caption=caption)                            
+                    await app.send_voice(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                 elif message.animation:
                     path = await message.download(progress=download_progress)
-                    await app.send_animation(destination_channel_id, path, caption=caption)                            
+                    await app.send_animation(destination_channel_id, path, caption=caption, progress=upload_progress)                            
                 elif message.sticker:
                     await app.send_sticker(destination_channel_id, message.sticker.file_id)
                 elif message.text:
@@ -278,6 +285,9 @@ def main():
         with Client(session_file, api_id=api_id, api_hash=api_hash) as app:
             # Modo Clonador
             choice = input("Deseja iniciar do zero ou continuar a clonagem? (digite '0' para começar do zero ou '1' para continuar): ")
+            print("Você deseja mencionar o autor da mensagem ou deseja ocular?")
+            print(f"Digite 1 para mencionar\nDigite 2 para ocultar")
+            mentionate = int(input("Selecione uma opção:"))
             if choice == '0':
                 file_name = input("Informe um nome para o arquivo da clonagem atual: ") + '.txt'
                 source_channel = input("Informe o username ou ID do canal origem (ex: @YourSourceChannel): ")
@@ -289,7 +299,7 @@ def main():
                     destination_channel = int(destination_channel)
 
                 save_state(file_name, source_channel, destination_channel, None, 0)  # 0 representa que não há última mensagem
-                app.run(clone_channel_messages(app, source_channel, destination_channel, file_name, last_message_id=0))
+                app.run(clone_channel_messages(app, source_channel, destination_channel, file_name, mentionate, last_message_id=0))
             else:
                 file_name = input("Informe o nome do arquivo a partir do qual deseja continuar a clonagem: ") + '.txt'
                 if os.path.exists(file_name):
@@ -301,7 +311,7 @@ def main():
                     if destination_channel.startswith("-") and destination_channel[1:].isdigit():
                         destination_channel = int(destination_channel)
                     
-                    app.run(clone_channel_messages(app, source_channel, destination_channel, file_name, last_message_id=last_message_id))
+                    app.run(clone_channel_messages(app, source_channel, destination_channel, file_name, mentionate, last_message_id=last_message_id))
                 else:
                     print("Arquivo não encontrado.")
                     return

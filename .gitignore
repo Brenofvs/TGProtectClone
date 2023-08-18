@@ -1,0 +1,14 @@
+# Ignorar arquivos específicos
+user.session
+user.session-journal
+config.ini
+
+# Ignorar todos os arquivos de texto, exceto requirements.txt
+*.txt
+!requirements.txt
+
+# Ignorar todas as pastas
+*/
+
+# Exceto a pasta vazia
+!.gitignore
